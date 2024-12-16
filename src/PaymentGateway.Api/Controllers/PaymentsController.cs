@@ -20,7 +20,10 @@ public class PaymentsController : Controller
     public async Task<ActionResult<PostPaymentResponse?>> GetPaymentAsync(Guid id)
     {
         var payment = _paymentsRepository.Get(id);
+        // return 404 if payment is not found
 
         return new OkObjectResult(payment);
     }
+
+    // Need a method which receives a post request to process a payment and sends back the appropriate response including the payment status
 }

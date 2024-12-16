@@ -58,4 +58,7 @@ public class PaymentsControllerTests
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    // need tests for requests to process a payment. have different tests which expect different payment statuses
+    // also test failure cases e.g. invalid request bodies
 }
