@@ -35,7 +35,18 @@ public class PaymentsRepository
             expiryDateString = "0" + expiryDateString;
         }
 
-        return null;
+        PostPaymentResponse response = new();
+        response.Id = Guid.NewGuid();
+        response.Status = status;
+
+        string cardNumber = paymentRequest.CardNumber;
+        response.CardNumberLastFour = cardNumber.Substring(cardNumber.Length - 4);
+        response.ExpiryMonth = paymentRequest.ExpiryMonth;
+        response.ExpiryYear = paymentRequest.ExpiryYear;
+        response.Currency = paymentRequest.Currency;
+        response.Amount = paymentRequest.Amount;
+
+        return response;
     }
 
     public PostPaymentResponse Get(Guid id)

@@ -30,3 +30,4 @@ I made a `DateHelper` class to contain utility methods because I will need to in
 - Could add more custom exceptions e.g. to specify which field made the payment invalid.
 - The SwaggerUI package being depended on has a vulnerability so should be updated.
 - Use a logger (via dependency injection) rather than Console.WriteLine
+- Better way of testing objects returned by POST requests- need to mock out Guid generation

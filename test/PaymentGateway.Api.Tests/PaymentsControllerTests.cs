@@ -3,7 +3,6 @@ using System.Net.Http.Json;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 
 using PaymentGateway.Api.Controllers;
 using PaymentGateway.Api.Models.Requests;
@@ -87,12 +86,25 @@ public class PaymentsControllerTests
 
         JsonContent content = JsonContent.Create(request);
 
+        //PostPaymentResponse expectedResponse = new();
+        //expectedResponse.Status = Models.PaymentStatus.Authorized;
+        //expectedResponse.CardNumberLastFour = "8112";
+        //expectedResponse.ExpiryMonth = request.ExpiryMonth;
+        //expectedResponse.ExpiryYear = request.ExpiryYear;
+        //expectedResponse.Currency = request.Currency;
+        //expectedResponse.Amount = request.Amount;
+
+        string expectedResponse = "{\"id\":\"3ef8a4c1-6932-445c-9e16-b1a985d2fc59\",\"status\":0,\"cardNumberLastFour\":\"8112\",\"expiryMonth\":11,\"expiryYear\":2026,\"currency\":\"USD\",\"amount\":60000}";
+
         // Act
         HttpResponseMessage response = await client.PostAsync(url, content);
+        string actualResponse = await response.Content.ReadAsStringAsync();
+        //PostPaymentResponse actualResponse = JsonSerializer.Deserialize<PostPaymentResponse>(responseBody);
 
         // Assert
-        // Need to check the response is as expected. Also status code will be Ok not NoContent once implementation is completed
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // ignoring first 47 chars because the ID is randomly generated
+        Assert.Equal(expectedResponse.Substring(47), actualResponse.Substring(47));
     }
 
     [Fact]
