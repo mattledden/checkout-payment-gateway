@@ -9,6 +9,12 @@ public static class DateHelper
 
     public static string MonthYearToString(DateTime date)
     {
-        return date.Month + "/" + date.Year;
+        string dateString = date.Month + "/" + date.Year;
+        if (dateString.Length < 7)
+        {
+            // add leading zero to month if necessary
+            dateString = "0" + dateString;
+        }
+        return dateString;
     }
 }

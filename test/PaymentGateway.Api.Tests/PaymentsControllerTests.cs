@@ -86,25 +86,32 @@ public class PaymentsControllerTests
 
         JsonContent content = JsonContent.Create(request);
 
-        //PostPaymentResponse expectedResponse = new();
-        //expectedResponse.Status = Models.PaymentStatus.Authorized;
-        //expectedResponse.CardNumberLastFour = "8112";
-        //expectedResponse.ExpiryMonth = request.ExpiryMonth;
-        //expectedResponse.ExpiryYear = request.ExpiryYear;
-        //expectedResponse.Currency = request.Currency;
-        //expectedResponse.Amount = request.Amount;
+        PostPaymentResponse expectedResponse = new();
+        expectedResponse.Status = Models.PaymentStatus.Authorized;
+        expectedResponse.CardNumberLastFour = "8112";
+        expectedResponse.ExpiryMonth = request.ExpiryMonth;
+        expectedResponse.ExpiryYear = request.ExpiryYear;
+        expectedResponse.Currency = request.Currency;
+        expectedResponse.Amount = request.Amount;
 
-        string expectedResponse = "{\"id\":\"3ef8a4c1-6932-445c-9e16-b1a985d2fc59\",\"status\":0,\"cardNumberLastFour\":\"8112\",\"expiryMonth\":11,\"expiryYear\":2026,\"currency\":\"USD\",\"amount\":60000}";
+        //string expectedResponse = "{\"id\":\"3ef8a4c1-6932-445c-9e16-b1a985d2fc59\",\"status\":0,\"cardNumberLastFour\":\"8112\",\"expiryMonth\":11,\"expiryYear\":2026,\"currency\":\"USD\",\"amount\":60000}";
 
         // Act
         HttpResponseMessage response = await client.PostAsync(url, content);
-        string actualResponse = await response.Content.ReadAsStringAsync();
+        string responseBody = await response.Content.ReadAsStringAsync();
+        PostPaymentResponse actualResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(responseBody);
         //PostPaymentResponse actualResponse = JsonSerializer.Deserialize<PostPaymentResponse>(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        // ignoring first 47 chars because the ID is randomly generated
-        Assert.Equal(expectedResponse.Substring(47), actualResponse.Substring(47));
+        Assert.NotNull(actualResponse);
+
+        Assert.Equal(expectedResponse.Status, actualResponse.Status);
+        Assert.Equal(expectedResponse.CardNumberLastFour, actualResponse.CardNumberLastFour);
+        Assert.Equal(expectedResponse.ExpiryMonth, actualResponse.ExpiryMonth);
+        Assert.Equal(expectedResponse.ExpiryYear, actualResponse.ExpiryYear);
+        Assert.Equal(expectedResponse.Currency, actualResponse.Currency);
+        Assert.Equal(expectedResponse.Amount, actualResponse.Amount);
     }
 
     [Fact]

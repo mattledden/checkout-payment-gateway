@@ -40,17 +40,11 @@ public class PaymentsController : Controller
     public async Task<ActionResult<PostPaymentResponse?>> PostPaymentAsync(PostPaymentRequest paymentRequest)
     {
         Console.WriteLine("Received POST request for new payment");
-        // catch custom exception and return 400 error
-        try
-        {
-            PostPaymentResponse paymentResponse = _paymentsRepository.ProcessPayment(paymentRequest);
 
-            return new OkObjectResult(paymentResponse);
-        }
-        catch (InvalidPaymentException ex)
-        {
-            Console.WriteLine($"{ex.Message}");
-            return new BadRequestObjectResult(ex.Message);
-        }
+        PostPaymentResponse paymentResponse = await _paymentsRepository.ProcessPayment(paymentRequest);
+
+        return paymentResponse.Status == Models.PaymentStatus.Authorized
+            ? (ActionResult<PostPaymentResponse?>)new OkObjectResult(paymentResponse)
+            : (ActionResult<PostPaymentResponse?>)new BadRequestObjectResult(paymentResponse);
     }
 }

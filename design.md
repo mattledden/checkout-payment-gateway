@@ -24,10 +24,11 @@ I made a `DateHelper` class to contain utility methods because I will need to in
 4. I then decided which classes I was likely to add and started implementing the code to handle POST requests.
 5. I added a class for custom exceptions.
 6. I implemented the class which validates payments then tested it using cURL and some basic unit tests which I will improve once more functionality has been added.
+7. I then added the functionality for sending requests to the acquiring bank. 
 
 ## Potential improvements
 
 - Could add more custom exceptions e.g. to specify which field made the payment invalid.
 - The SwaggerUI package being depended on has a vulnerability so should be updated.
 - Use a logger (via dependency injection) rather than Console.WriteLine
-- Better way of testing objects returned by POST requests- need to mock out Guid generation
+- Better way of testing objects returned by POST requests- need to mock out Guid generation. Also, would be better to deserialise the returned object rather than comparing the strings
