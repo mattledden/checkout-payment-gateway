@@ -3,6 +3,7 @@ using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
 using PaymentGateway.Api.PaymentProcessing;
+using PaymentGateway.Api.Utilities;
 
 namespace PaymentGateway.Api.Services;
 
@@ -18,9 +19,21 @@ public class PaymentsRepository
         _bankClient = bankClient;
     }
 
-    public void Add(PostPaymentResponse payment)
+    private void Add(PostPaymentResponse payment)
     {
         Payments.Add(payment);
+    }
+
+    private PostPaymentResponse GenerateResponse(PostPaymentRequest paymentRequest, PaymentStatus status)
+    {
+        // might need tostring method in datehelper class
+        DateTime expiryDate = DateHelper.FormatDate(paymentRequest.ExpiryMonth, paymentRequest.ExpiryYear);
+        string expiryDateString = DateHelper.MonthYearToString(expiryDate);
+        if (expiryDateString.Length < 7)
+        {
+            // add leading zero to month if necessary
+            expiryDateString = "0" + expiryDateString;
+        }
     }
 
     public PostPaymentResponse Get(Guid id)
@@ -46,5 +59,9 @@ public class PaymentsRepository
         // send request to bank
         PaymentStatus bankResponse = _bankClient.SendRequest();
         // create response object and add it to Payments list then return it
+        PostPaymentResponse paymentResponse = GenerateResponse(paymentRequest, bankResponse);
+        Add(paymentResponse);
+
+        return paymentResponse;
     }
 }

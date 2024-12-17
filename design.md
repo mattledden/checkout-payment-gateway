@@ -3,16 +3,17 @@
 I've decided to utilise the existing structure of the sample code (i.e. the use of a controller, service and models) then will add classes where necessary.
 I plan to add a class for verifying payment requests so that this is separate from the PaymentsRepository service and can be encapsulated well.
 I also plan to add a class responsible for sending requests to the acquiring bank.
-I will make a class for custom exceptions like InvalidPaymentRequestException.
+I will make a class for custom exceptions like `InvalidPaymentException`.
 
 I may add a class containing helper functions for my unit tests.
 
-I decided the PaymentValidator class should be added as a singleton service because it is a simple class and only one instance is required.
-I decided the BankClient class should be added as a scoped service because it will contain asynchronous methods so separate requests to the PaymentGateway should use separate instances of this service. I may make an interface for this class in order to provide abstraction.
+I decided the `PaymentValidator` class should be added as a singleton service because it is a simple class and only one instance is required.
+I decided the `BankClient` class should be added as a scoped service because it will contain asynchronous methods so separate requests to the PaymentGateway should use separate instances of this service. I may make an interface for this class in order to provide abstraction.
+I made a `DateHelper` class to contain utility methods because I will need to interact with dates in multiple classes.
 
 ## Assumptions made
 
-- The PostPaymentRequest model contained a field called `CardNumberLastFour`. I changed this to `CardNumber` because the spec states that payment requests should contain a full card number
+- The `PostPaymentRequest` model contained a field called `CardNumberLastFour`. I changed this to `CardNumber` because the spec states that payment requests should contain a full card number
 - I changed the type of the `CardNumber`, `CardNumberLastFour` and `CVV` fields to be strings in case they contain leading zeros and because they are strings when sent to the bank simulator anyway.
 - I left the `ExpiryMonth` and `ExpiryYear` fields as integers to simplify verifying their values.
 
@@ -23,3 +24,7 @@ I decided the BankClient class should be added as a scoped service because it wi
 3. Next, I ran the existing unit tests in the codebase and thought about what was needed to get the second one to pass as well as potential test cases I could write.
 4. I then decided which classes I was likely to add and started implementing the code to handle POST requests.
 5. I added a class for custom exceptions.
+
+## Potential improvements
+
+Could add more custom exceptions e.g. to specify which field made the payment invalid.
