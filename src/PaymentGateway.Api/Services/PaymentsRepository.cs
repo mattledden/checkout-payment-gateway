@@ -19,7 +19,7 @@ public class PaymentsRepository
         _bankClient = bankClient;
     }
 
-    private void Add(PostPaymentResponse payment)
+    public void Add(PostPaymentResponse payment)
     {
         Payments.Add(payment);
     }
@@ -34,6 +34,8 @@ public class PaymentsRepository
             // add leading zero to month if necessary
             expiryDateString = "0" + expiryDateString;
         }
+
+        return null;
     }
 
     public PostPaymentResponse Get(Guid id)
@@ -53,11 +55,10 @@ public class PaymentsRepository
         if (!isValid)
         {
             throw new InvalidPaymentException("Payment request is invalid");
-
         }
 
         // send request to bank
-        PaymentStatus bankResponse = _bankClient.SendRequest();
+        PaymentStatus bankResponse = PaymentStatus.Authorized;//_bankClient.SendRequest();
         // create response object and add it to Payments list then return it
         PostPaymentResponse paymentResponse = GenerateResponse(paymentRequest, bankResponse);
         Add(paymentResponse);

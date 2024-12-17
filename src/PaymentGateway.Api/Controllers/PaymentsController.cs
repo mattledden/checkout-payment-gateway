@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
+using PaymentGateway.Api.Exceptions;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
 using PaymentGateway.Api.Services;
@@ -20,20 +21,36 @@ public class PaymentsController : Controller
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<PostPaymentResponse?>> GetPaymentAsync(Guid id)
     {
-        PostPaymentResponse payment = _paymentsRepository.Get(id);
-        // return 404 if payment is not found
+        Console.WriteLine($"Received GET request for payment with id {id}");
 
-        return new OkObjectResult(payment);
+        try
+        {
+            PostPaymentResponse payment = _paymentsRepository.Get(id);
+            return new OkObjectResult(payment);
+        }
+        catch (PaymentNotFoundException ex)
+        {
+            return new NotFoundObjectResult(ex.Message);
+        }
     }
 
     // Need a method which receives a post request to process a payment and sends back the appropriate response including the payment status
 
-    [HttpPost]
+    [HttpPost("new")]
     public async Task<ActionResult<PostPaymentResponse?>> PostPaymentAsync(PostPaymentRequest paymentRequest)
     {
+        Console.WriteLine("Received POST request for new payment");
         // catch custom exception and return 400 error
-        PostPaymentResponse paymentResponse = _paymentsRepository.ProcessPayment(paymentRequest);
+        try
+        {
+            PostPaymentResponse paymentResponse = _paymentsRepository.ProcessPayment(paymentRequest);
 
-        return new OkObjectResult(paymentResponse);
+            return new OkObjectResult(paymentResponse);
+        }
+        catch (InvalidPaymentException ex)
+        {
+            Console.WriteLine($"{ex.Message}");
+            return new BadRequestObjectResult(ex.Message);
+        }
     }
 }

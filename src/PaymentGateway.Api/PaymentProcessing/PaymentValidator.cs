@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Utilities;
 
@@ -5,13 +7,6 @@ namespace PaymentGateway.Api.PaymentProcessing;
 
 public class PaymentValidator
 {
-    private readonly ILogger _logger;
-
-    public PaymentValidator(ILogger logger)
-    {
-        _logger = logger;
-    }
-
     public bool Validate(PostPaymentRequest paymentRequest)
     {
         // validate length of card number plus only numbers, dates and whether they're in future, currency, amount > 0, CVV is 3-4 chars long and only numeric
@@ -25,8 +20,9 @@ public class PaymentValidator
     private bool ValidateCardNumber(string cardNumber)
     {
         int length = cardNumber.Length;
-        int num = 0;
-        bool isNumeric = int.TryParse(cardNumber, out num);
+        bool isNumeric = Regex.IsMatch(cardNumber, @"^\d+$");
+
+        Console.WriteLine($"Card number is numeric: {isNumeric}");
 
         return length >= 14 && length <= 19 && isNumeric;
     }
@@ -41,8 +37,7 @@ public class PaymentValidator
         }
         catch (ArgumentOutOfRangeException)
         {
-            // log error
-            _logger.LogError("Expiry date is not a valid date");
+            Console.WriteLine("Expiry date is not a valid date");
             return false;
         }
     }
@@ -60,8 +55,7 @@ public class PaymentValidator
     private bool ValidateCvv(string cvv)
     {
         int length = cvv.Length;
-        int num = 0;
-        bool isNumeric = int.TryParse(cvv, out num);
+        bool isNumeric = Regex.IsMatch(cvv, @"^\d+$");
 
         return length >= 3 && length <= 4 && isNumeric;
     }

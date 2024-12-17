@@ -10,11 +10,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddLogging();
-
 builder.Services.AddSingleton<PaymentsRepository>();
 builder.Services.AddSingleton<PaymentValidator>();
-builder.Services.AddScoped<BankClient>();
+builder.Services.AddSingleton<BankClient>();
 
 WebApplication app = builder.Build();
 
