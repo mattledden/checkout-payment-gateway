@@ -1,5 +1,5 @@
 using PaymentGateway.Api.Models.Requests;
-using PaymentGateway.Api.PaymentProcessing;
+using PaymentGateway.Api.Services;
 
 namespace PaymentGateway.Api.Tests;
 
@@ -9,7 +9,7 @@ public class PaymentValidatorTests
     public void ValidPayment()
     {
         // Arrange
-        PostPaymentRequest request = new();
+        PaymentRequest request = new();
         request.CardNumber = "2222405343248112";
         request.ExpiryMonth = 5;
         request.ExpiryYear = 2027;
@@ -30,7 +30,7 @@ public class PaymentValidatorTests
     public void PastDate()
     {
         // Arrange
-        PostPaymentRequest request = new();
+        PaymentRequest request = new();
         request.CardNumber = "2222405343248112";
         request.ExpiryMonth = 5;
         request.ExpiryYear = 2023;
@@ -51,7 +51,7 @@ public class PaymentValidatorTests
     public void NonNumericCardNumber()
     {
         // Arrange
-        PostPaymentRequest request = new();
+        PaymentRequest request = new();
         request.CardNumber = "ab22405343248112";
         request.ExpiryMonth = 5;
         request.ExpiryYear = 2027;
@@ -72,7 +72,7 @@ public class PaymentValidatorTests
     public void ShortCardNumber()
     {
         // Arrange
-        PostPaymentRequest request = new();
+        PaymentRequest request = new();
         request.CardNumber = "43248112";
         request.ExpiryMonth = 5;
         request.ExpiryYear = 2027;
@@ -93,7 +93,7 @@ public class PaymentValidatorTests
     public void InvalidCurrency()
     {
         // Arrange
-        PostPaymentRequest request = new();
+        PaymentRequest request = new();
         request.CardNumber = "2222405343248112";
         request.ExpiryMonth = 5;
         request.ExpiryYear = 2027;
@@ -114,7 +114,7 @@ public class PaymentValidatorTests
     public void NegativeAmount()
     {
         // Arrange
-        PostPaymentRequest request = new();
+        PaymentRequest request = new();
         request.CardNumber = "2222405343248112";
         request.ExpiryMonth = 5;
         request.ExpiryYear = 2027;
@@ -135,7 +135,7 @@ public class PaymentValidatorTests
     public void InvalidCvv()
     {
         // Arrange
-        PostPaymentRequest request = new();
+        PaymentRequest request = new();
         request.CardNumber = "2222405343248112";
         request.ExpiryMonth = 5;
         request.ExpiryYear = 2027;

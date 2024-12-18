@@ -1,14 +1,16 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+
+using NSubstitute;
 
 using PaymentGateway.Api.Controllers;
 using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
-using PaymentGateway.Api.PaymentProcessing;
 using PaymentGateway.Api.Services;
 using PaymentGateway.Api.Utilities;
 
@@ -26,7 +28,7 @@ public class PaymentsControllerTests
     public async Task RetrievesAPaymentSuccessfully()
     {
         // Arrange
-        PostPaymentResponse payment = new()
+        PaymentResponse payment = new()
         {
             Id = Guid.NewGuid(),
             ExpiryYear = _random.Next(2023, 2030),
@@ -50,7 +52,7 @@ public class PaymentsControllerTests
 
         // Act
         HttpResponseMessage response = await client.GetAsync($"/api/Payments/{payment.Id}");
-        PostPaymentResponse? paymentResponse = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();
+        PaymentResponse? paymentResponse = await response.Content.ReadFromJsonAsync<PaymentResponse>();
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -88,7 +90,7 @@ public class PaymentsControllerTests
         HttpClient client = webApplicationFactory.CreateClient();
         string url = $"/api/Payments/new";
 
-        PostPaymentRequest request = new()
+        PaymentRequest request = new()
         {
             CardNumber = "2222405343248112",
             ExpiryMonth = 13,
@@ -98,14 +100,14 @@ public class PaymentsControllerTests
             Cvv = "456"
         };
 
-        PostPaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Rejected);
+        PaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Rejected);
 
         JsonContent content = JsonContent.Create(request);
 
         // Act
         HttpResponseMessage response = await client.PostAsync(url, content);
         string responseBody = await response.Content.ReadAsStringAsync();
-        PostPaymentResponse actualResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(responseBody);
+        PaymentResponse actualResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PaymentResponse>(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -127,7 +129,7 @@ public class PaymentsControllerTests
         HttpClient client = webApplicationFactory.CreateClient();
         string url = $"/api/Payments/new";
 
-        PostPaymentRequest request = new()
+        PaymentRequest request = new()
         {
             CardNumber = "1234567890987654",
             ExpiryMonth = 2,
@@ -139,12 +141,12 @@ public class PaymentsControllerTests
 
         JsonContent content = JsonContent.Create(request);
 
-        PostPaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Declined);
+        PaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Declined);
 
         // Act
         HttpResponseMessage response = await client.PostAsync(url, content);
         string responseBody = await response.Content.ReadAsStringAsync();
-        PostPaymentResponse actualResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(responseBody);
+        PaymentResponse actualResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PaymentResponse>(responseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -159,14 +161,14 @@ public class PaymentsControllerTests
     /// </summary>
     /// 
     [Fact]
-    public async Task PostAndRetrieveDeclinedPayment()
+    public async Task PostAndRetrievePayment()
     {
         // Arrange
         WebApplicationFactory<PaymentsController> webApplicationFactory = new();
         HttpClient client = webApplicationFactory.CreateClient();
         string url = $"/api/Payments/new";
 
-        PostPaymentRequest request = new()
+        PaymentRequest request = new()
         {
             CardNumber = "2222405343248112",
             ExpiryMonth = 11,
@@ -181,13 +183,13 @@ public class PaymentsControllerTests
         // Act
         HttpResponseMessage postResponseMessage = await client.PostAsync(url, content);
         string postResponseBody = await postResponseMessage.Content.ReadAsStringAsync();
-        PostPaymentResponse postResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(postResponseBody);
+        PaymentResponse postResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PaymentResponse>(postResponseBody);
 
         string getUrl = "/api/Payments/" + postResponse.Id;
 
         HttpResponseMessage getResponseMessage = await client.GetAsync(getUrl);
         string getResponseBody = await getResponseMessage.Content.ReadAsStringAsync();
-        PostPaymentResponse getResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(getResponseBody);
+        PaymentResponse getResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PaymentResponse>(getResponseBody);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, getResponseMessage.StatusCode);
@@ -195,5 +197,48 @@ public class PaymentsControllerTests
 
         // check the response from the GET request is the same as the one returned by the POST request
         TestUtilities.CompareResponses(postResponse, getResponse);
+    }
+
+    /// <summary>
+    /// Make a payment by calling methods directly rather than by making a POST request so the bank client can be mocked.
+    /// </summary>
+    /// 
+    [Fact]
+    public async Task MakeValidPayment()
+    {
+        // Arrange
+        PaymentRequest request = new()
+        {
+            CardNumber = "2222405343248112",
+            ExpiryMonth = 11,
+            ExpiryYear = 2026,
+            Currency = "USD",
+            Amount = 60000,
+            Cvv = "456"
+        };
+
+        PaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Authorized);
+
+        PaymentValidator paymentValidator = new();
+
+        // mock bankclient to return Authorized status
+        IBankClient mockedBank = Substitute.For<BankClient>();
+        mockedBank.SendRequest(Arg.Any<BankRequest>()).Returns(PaymentStatus.Authorized);
+
+        PaymentsRepository paymentsRepository = new(paymentValidator, mockedBank);
+
+        PaymentsController controller = new(paymentsRepository);
+
+        // Act
+        ActionResult<PaymentResponse?> response = await controller.PostPaymentAsync(request);
+
+        // A successful request will result in an OkObjectResult
+        OkObjectResult? result = (OkObjectResult)response.Result;
+        PaymentResponse actualResponse = (PaymentResponse)result.Value;
+
+        // Assert
+        Assert.NotNull(actualResponse);
+
+        TestUtilities.CompareResponses(expectedResponse, actualResponse);
     }
 }

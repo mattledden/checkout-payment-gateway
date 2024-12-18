@@ -3,7 +3,6 @@ using NSubstitute;
 using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
-using PaymentGateway.Api.PaymentProcessing;
 using PaymentGateway.Api.Services;
 using PaymentGateway.Api.Utilities;
 
@@ -20,7 +19,7 @@ public class PaymentsRepositoryTests
     public async Task AuthorizedPayment()
     {
         // Arrange
-        PostPaymentRequest request = new()
+        PaymentRequest request = new()
         {
             CardNumber = "2222405343248112",
             ExpiryMonth = 11,
@@ -30,7 +29,7 @@ public class PaymentsRepositoryTests
             Cvv = "456",
         };
 
-        PostPaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Authorized);
+        PaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Authorized);
 
         PaymentValidator paymentValidator = new();
 
@@ -41,7 +40,7 @@ public class PaymentsRepositoryTests
         PaymentsRepository paymentsRepository = new(paymentValidator, mockedBank);
 
         // Act
-        PostPaymentResponse response = await paymentsRepository.ProcessPayment(request);
+        PaymentResponse response = await paymentsRepository.ProcessPayment(request);
 
         // Assert
         Assert.NotNull(response);
@@ -57,7 +56,7 @@ public class PaymentsRepositoryTests
     public async Task DeclinedPayment()
     {
         // Arrange
-        PostPaymentRequest request = new()
+        PaymentRequest request = new()
         {
             CardNumber = "2222405343248112",
             ExpiryMonth = 11,
@@ -67,7 +66,7 @@ public class PaymentsRepositoryTests
             Cvv = "999",
         };
 
-        PostPaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Declined);
+        PaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Declined);
 
         PaymentValidator paymentValidator = new();
 
@@ -78,7 +77,7 @@ public class PaymentsRepositoryTests
         PaymentsRepository paymentsRepository = new(paymentValidator, mockedBank);
 
         // Act
-        PostPaymentResponse response = await paymentsRepository.ProcessPayment(request);
+        PaymentResponse response = await paymentsRepository.ProcessPayment(request);
 
         // Assert
         Assert.NotNull(response);
@@ -94,7 +93,7 @@ public class PaymentsRepositoryTests
     public async Task InvalidPayment()
     {
         // Arrange
-        PostPaymentRequest request = new()
+        PaymentRequest request = new()
         {
             CardNumber = "2222405343248112",
             ExpiryMonth = 11,
@@ -104,7 +103,7 @@ public class PaymentsRepositoryTests
             Cvv = "999",
         };
 
-        PostPaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Rejected);
+        PaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Rejected);
 
         PaymentValidator paymentValidator = new();
 
@@ -114,7 +113,7 @@ public class PaymentsRepositoryTests
         PaymentsRepository paymentsRepository = new(paymentValidator, mockedBank);
 
         // Act
-        PostPaymentResponse response = await paymentsRepository.ProcessPayment(request);
+        PaymentResponse response = await paymentsRepository.ProcessPayment(request);
 
         // Assert
         Assert.NotNull(response);

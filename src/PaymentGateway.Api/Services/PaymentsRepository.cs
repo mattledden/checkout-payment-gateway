@@ -2,14 +2,13 @@
 using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
-using PaymentGateway.Api.PaymentProcessing;
 using PaymentGateway.Api.Utilities;
 
 namespace PaymentGateway.Api.Services;
 
 public class PaymentsRepository
 {
-    private List<PostPaymentResponse> Payments = new();
+    private List<PaymentResponse> Payments = new();
     private readonly PaymentValidator _paymentValidator;
     private readonly IBankClient _bankClient;
 
@@ -19,15 +18,15 @@ public class PaymentsRepository
         _bankClient = bankClient;
     }
 
-    public void Add(PostPaymentResponse payment)
+    public void Add(PaymentResponse payment)
     {
         Payments.Add(payment);
     }
 
-    public PostPaymentResponse Get(Guid id)
+    public PaymentResponse Get(Guid id)
     {
         // throw error if payment is not found
-        PostPaymentResponse? paymentResponse = Payments.FirstOrDefault(p => p.Id == id);
+        PaymentResponse? paymentResponse = Payments.FirstOrDefault(p => p.Id == id);
         return paymentResponse is not null ? paymentResponse : throw new PaymentNotFoundException($"Payment with id {id} not found");
     }
 
@@ -35,7 +34,7 @@ public class PaymentsRepository
     /// Validate payments then send them to the acquiring bank
     /// </summary>
     /// 
-    public async Task<PostPaymentResponse> ProcessPayment(PostPaymentRequest paymentRequest)
+    public async Task<PaymentResponse> ProcessPayment(PaymentRequest paymentRequest)
     {
         bool isValid = _paymentValidator.Validate(paymentRequest);
         PaymentStatus status;
@@ -57,7 +56,7 @@ public class PaymentsRepository
         }
 
         // create response object and add it to Payments list then return it
-        PostPaymentResponse paymentResponse = ResponseHelper.GenerateResponse(paymentRequest, status);
+        PaymentResponse paymentResponse = ResponseHelper.GenerateResponse(paymentRequest, status);
         Add(paymentResponse);
 
         return paymentResponse;

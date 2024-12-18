@@ -1,4 +1,3 @@
-using PaymentGateway.Api.PaymentProcessing;
 using PaymentGateway.Api.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

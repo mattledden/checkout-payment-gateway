@@ -10,7 +10,7 @@ public class BankRequest
     public int Amount { get; set; }
     public string Cvv { get; set; }
 
-    public BankRequest(PostPaymentRequest paymentRequest)
+    public BankRequest(PaymentRequest paymentRequest)
     {
         DateTime expiryDate = DateHelper.FormatDate(paymentRequest.ExpiryMonth, paymentRequest.ExpiryYear);
         string expiryDateString = DateHelper.MonthYearToString(expiryDate);

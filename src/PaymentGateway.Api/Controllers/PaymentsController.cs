@@ -19,13 +19,13 @@ public class PaymentsController : Controller
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<PostPaymentResponse?>> GetPaymentAsync(Guid id)
+    public async Task<ActionResult<PaymentResponse?>> GetPaymentAsync(Guid id)
     {
         Console.WriteLine($"Received GET request for payment with id {id}");
 
         try
         {
-            PostPaymentResponse payment = _paymentsRepository.Get(id);
+            PaymentResponse payment = _paymentsRepository.Get(id);
             return new OkObjectResult(payment);
         }
         catch (PaymentNotFoundException ex)
@@ -36,16 +36,16 @@ public class PaymentsController : Controller
     }
 
     [HttpPost("new")]
-    public async Task<ActionResult<PostPaymentResponse?>> PostPaymentAsync(PostPaymentRequest paymentRequest)
+    public async Task<ActionResult<PaymentResponse?>> PostPaymentAsync(PaymentRequest paymentRequest)
     {
         Console.WriteLine("Received POST request for new payment");
 
-        PostPaymentResponse paymentResponse = await _paymentsRepository.ProcessPayment(paymentRequest);
+        PaymentResponse paymentResponse = await _paymentsRepository.ProcessPayment(paymentRequest);
 
         Console.WriteLine($"Sending response with status {paymentResponse.Status}");
 
         return paymentResponse.Status == Models.PaymentStatus.Authorized
-            ? (ActionResult<PostPaymentResponse?>)new OkObjectResult(paymentResponse)
-            : (ActionResult<PostPaymentResponse?>)new BadRequestObjectResult(paymentResponse);
+            ? (ActionResult<PaymentResponse?>)new OkObjectResult(paymentResponse)
+            : (ActionResult<PaymentResponse?>)new BadRequestObjectResult(paymentResponse);
     }
 }

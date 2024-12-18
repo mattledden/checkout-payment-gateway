@@ -6,10 +6,10 @@ namespace PaymentGateway.Api.Utilities;
 
 public static class ResponseHelper
 {
-    public static PostPaymentResponse GenerateResponse(PostPaymentRequest paymentRequest, PaymentStatus status)
+    public static PaymentResponse GenerateResponse(PaymentRequest paymentRequest, PaymentStatus status)
     {
         string cardNumber = paymentRequest.CardNumber;
-        PostPaymentResponse response = new()
+        PaymentResponse response = new()
         {
             Id = Guid.NewGuid(),
             Status = status,

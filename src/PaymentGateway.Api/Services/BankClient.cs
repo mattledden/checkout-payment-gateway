@@ -1,10 +1,8 @@
-using System.Text.Json;
-
 using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
 
-namespace PaymentGateway.Api.PaymentProcessing;
+namespace PaymentGateway.Api.Services;
 
 public class BankClient : IBankClient
 {
@@ -17,12 +15,13 @@ public class BankClient : IBankClient
     }
 
     /// <summary>
-    /// Serialise request then send it to bank simulator and retrieve status from response
+    /// Serialise request then send it to bank simulator and retrieve status from response.
+    /// This method is virtual so it can be mocked in UTs.
     /// </summary>
     /// 
     public virtual async Task<PaymentStatus> SendRequest(BankRequest paymentRequest)
     {
-        string requestBody = JsonSerializer.Serialize(paymentRequest);
+        string requestBody = Newtonsoft.Json.JsonConvert.SerializeObject(paymentRequest);
         StringContent requestContent = new(requestBody);
 
         HttpResponseMessage response = await _httpClient.PostAsync(Url, requestContent);
