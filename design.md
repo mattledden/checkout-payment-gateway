@@ -1,11 +1,17 @@
 # Design considerations
 
+## Initial thoughts
+
 I've decided to utilise the existing structure of the sample code (i.e. the use of a controller, service and models) then will add classes where necessary.
+
 I plan to add a class for verifying payment requests so that this is separate from the PaymentsRepository service and can be encapsulated well.
 I also plan to add a class responsible for sending requests to the acquiring bank.
+
 I will make a class for custom exceptions like `InvalidPaymentException`.
 
 I may add a class containing helper functions for my unit tests.
+
+## Decisions made
 
 Both the `PaymentValidator` and `BankClient` classes needed to be added as singleton services because the `PaymentsRepository` class depends on them and that class is a singleton.
 `BankClient` implements an interface (`IBankClient`) so it can be mocked in my unit tests.
@@ -40,4 +46,7 @@ I created a `BankRequest` model so the `CardNumber` field could be renamed to `C
 - Better way of testing objects returned by POST requests- need to mock out Guid generation. Also, would be better to deserialise the returned object rather than comparing the strings.
 - I could make a wrapper class and interface for `HttpClient` in order to mock it when testing the `BankClient` class.
 - Could revert to using `GetPaymentResponse` and make the fields on there readonly.
-- Could add more unit tests for `PaymentValidator` to cover edge cases
+- Could add more unit tests for `PaymentValidator` to cover edge cases.
+- Could make fields within models private and use getter and setter methods. I decided to leave them public for simplicity and to be consistent with the sample code.
+- Could add a method to the controller which returns a list of payments. Either the full list or a list based on a set of requested IDs
+- Would be worth authenticating requests plus considering which merchant is making the request and which bank the request is being sent to- could be worth storing payments accordingly

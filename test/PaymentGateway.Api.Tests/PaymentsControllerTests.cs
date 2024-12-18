@@ -200,7 +200,8 @@ public class PaymentsControllerTests
     }
 
     /// <summary>
-    /// Make a payment by calling methods directly rather than by making a POST request so the bank client can be mocked.
+    /// Make a payment by calling controller method directly rather than by making a POST request so the bank client can be mocked.
+    /// Bank client mocked to return Authorized status
     /// </summary>
     /// 
     [Fact]
@@ -234,6 +235,50 @@ public class PaymentsControllerTests
 
         // A successful request will result in an OkObjectResult
         OkObjectResult? result = (OkObjectResult)response.Result;
+        PaymentResponse actualResponse = (PaymentResponse)result.Value;
+
+        // Assert
+        Assert.NotNull(actualResponse);
+
+        TestUtilities.CompareResponses(expectedResponse, actualResponse);
+    }
+
+    /// <summary>
+    /// Make a payment by calling controller method directly rather than by making a POST request so the bank client can be mocked.
+    /// Bank client mocked to return Declined status
+    /// </summary>
+    /// 
+    [Fact]
+    public async Task MakeDeclinedPayment()
+    {
+        // Arrange
+        PaymentRequest request = new()
+        {
+            CardNumber = "2222405343248112",
+            ExpiryMonth = 11,
+            ExpiryYear = 2026,
+            Currency = "USD",
+            Amount = 60000,
+            Cvv = "456"
+        };
+
+        PaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Declined);
+
+        PaymentValidator paymentValidator = new();
+
+        // mock bankclient to return Authorized status
+        IBankClient mockedBank = Substitute.For<BankClient>();
+        mockedBank.SendRequest(Arg.Any<BankRequest>()).Returns(PaymentStatus.Declined);
+
+        PaymentsRepository paymentsRepository = new(paymentValidator, mockedBank);
+
+        PaymentsController controller = new(paymentsRepository);
+
+        // Act
+        ActionResult<PaymentResponse?> response = await controller.PostPaymentAsync(request);
+
+        // An unsuccessful request will result in an BadRequestObjectResult
+        BadRequestObjectResult? result = (BadRequestObjectResult)response.Result;
         PaymentResponse actualResponse = (PaymentResponse)result.Value;
 
         // Assert
