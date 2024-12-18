@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<PaymentsRepository>();
 builder.Services.AddSingleton<PaymentValidator>();
-builder.Services.AddSingleton<BankClient>();
+builder.Services.AddSingleton<IBankClient, BankClient>();
 
 WebApplication app = builder.Build();
 

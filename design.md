@@ -8,6 +8,7 @@ I will make a class for custom exceptions like `InvalidPaymentException`.
 I may add a class containing helper functions for my unit tests.
 
 Both the `PaymentValidator` and `BankClient` classes needed to be added as singleton services because the `PaymentsRepository` class depends on them and that class is a singleton.
+`BankClient` implements an interface (`IBankClient`) so it can be mocked in my unit tests.
 I made a `DateHelper` class to contain utility methods because I will need to interact with dates in multiple classes.
 
 ## Assumptions made
@@ -25,10 +26,12 @@ I made a `DateHelper` class to contain utility methods because I will need to in
 5. I added a class for custom exceptions.
 6. I implemented the class which validates payments then tested it using cURL and some basic unit tests which I will improve once more functionality has been added.
 7. I then added the functionality for sending requests to the acquiring bank. 
+8. Finally, I added more unit tests and refactored my code.
 
 ## Potential improvements
 
 - Could add more custom exceptions e.g. to specify which field made the payment invalid.
 - The SwaggerUI package being depended on has a vulnerability so should be updated.
-- Use a logger (via dependency injection) rather than Console.WriteLine
-- Better way of testing objects returned by POST requests- need to mock out Guid generation. Also, would be better to deserialise the returned object rather than comparing the strings
+- Use a logger (via dependency injection) rather than Console.WriteLine.
+- Better way of testing objects returned by POST requests- need to mock out Guid generation. Also, would be better to deserialise the returned object rather than comparing the strings.
+- I could make a wrapper class and interface for `HttpClient` in order to mock it when testing the `BankClient` class.

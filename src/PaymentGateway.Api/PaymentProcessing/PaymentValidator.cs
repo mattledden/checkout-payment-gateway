@@ -7,9 +7,16 @@ namespace PaymentGateway.Api.PaymentProcessing;
 
 public class PaymentValidator
 {
+    /// <summary>
+    /// Validate length of card number and that it only contains numbers.
+    /// Validate dates and whether they're in future.
+    /// Check currency is an accepted value.
+    /// Check amount > 0.
+    /// Check CVV is 3-4 chars long and only numeric
+    /// </summary>
+    /// 
     public bool Validate(PostPaymentRequest paymentRequest)
     {
-        // validate length of card number plus only numbers, dates and whether they're in future, currency, amount > 0, CVV is 3-4 chars long and only numeric
         return ValidateCardNumber(paymentRequest.CardNumber) &&
             ValidateExpiryDate(paymentRequest.ExpiryMonth, paymentRequest.ExpiryYear) &&
             ValidateCurrency(paymentRequest.Currency) &&

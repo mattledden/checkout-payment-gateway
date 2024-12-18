@@ -34,14 +34,14 @@ public class PaymentsController : Controller
         }
     }
 
-    // Need a method which receives a post request to process a payment and sends back the appropriate response including the payment status
-
     [HttpPost("new")]
     public async Task<ActionResult<PostPaymentResponse?>> PostPaymentAsync(PostPaymentRequest paymentRequest)
     {
         Console.WriteLine("Received POST request for new payment");
 
         PostPaymentResponse paymentResponse = await _paymentsRepository.ProcessPayment(paymentRequest);
+
+        Console.WriteLine($"Sending response with status {paymentResponse.Status}");
 
         return paymentResponse.Status == Models.PaymentStatus.Authorized
             ? (ActionResult<PostPaymentResponse?>)new OkObjectResult(paymentResponse)

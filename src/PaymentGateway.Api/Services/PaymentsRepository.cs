@@ -3,6 +3,7 @@ using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
 using PaymentGateway.Api.PaymentProcessing;
+using PaymentGateway.Api.Utilities;
 
 namespace PaymentGateway.Api.Services;
 
@@ -10,9 +11,9 @@ public class PaymentsRepository
 {
     private List<PostPaymentResponse> Payments = new();
     private PaymentValidator _paymentValidator;
-    private BankClient _bankClient;
+    private IBankClient _bankClient;
 
-    public PaymentsRepository(PaymentValidator paymentValidator, BankClient bankClient)
+    public PaymentsRepository(PaymentValidator paymentValidator, IBankClient bankClient)
     {
         _paymentValidator = paymentValidator;
         _bankClient = bankClient;
@@ -23,21 +24,7 @@ public class PaymentsRepository
         Payments.Add(payment);
     }
 
-    private PostPaymentResponse GenerateResponse(PostPaymentRequest paymentRequest, PaymentStatus status)
-    {
-        PostPaymentResponse response = new();
-        response.Id = Guid.NewGuid();
-        response.Status = status;
 
-        string cardNumber = paymentRequest.CardNumber;
-        response.CardNumberLastFour = cardNumber.Substring(cardNumber.Length - 4);
-        response.ExpiryMonth = paymentRequest.ExpiryMonth;
-        response.ExpiryYear = paymentRequest.ExpiryYear;
-        response.Currency = paymentRequest.Currency;
-        response.Amount = paymentRequest.Amount;
-
-        return response;
-    }
 
     public PostPaymentResponse Get(Guid id)
     {
@@ -45,9 +32,6 @@ public class PaymentsRepository
         PostPaymentResponse? paymentResponse = Payments.FirstOrDefault(p => p.Id == id);
         return paymentResponse is not null ? paymentResponse : throw new PaymentNotFoundException($"Payment with id {id} not found");
     }
-
-    // need a method for processing a payment and determining the status
-    // need to validate fields on payment requests (dates should be valid etc). Could have separate class
 
     public async Task<PostPaymentResponse> ProcessPayment(PostPaymentRequest paymentRequest)
     {
@@ -68,7 +52,7 @@ public class PaymentsRepository
         }
 
         // create response object and add it to Payments list then return it
-        PostPaymentResponse paymentResponse = GenerateResponse(paymentRequest, status);
+        PostPaymentResponse paymentResponse = ResponseHelper.GenerateResponse(paymentRequest, status);
         Add(paymentResponse);
 
         return paymentResponse;

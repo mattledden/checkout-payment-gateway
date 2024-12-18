@@ -6,7 +6,7 @@ using PaymentGateway.Api.Models.Responses;
 
 namespace PaymentGateway.Api.PaymentProcessing;
 
-public class BankClient
+public class BankClient : IBankClient
 {
     private HttpClient _httpClient;
     private const string Url = "http://localhost:8080/payments";
@@ -16,7 +16,7 @@ public class BankClient
         _httpClient = new HttpClient();
     }
 
-    public async Task<PaymentStatus> SendRequest(BankRequest paymentRequest)
+    public virtual async Task<PaymentStatus> SendRequest(BankRequest paymentRequest)
     {
         // serialise request then send it to bank simulator and retrieve status from response
         string requestBody = JsonSerializer.Serialize(paymentRequest);
@@ -25,7 +25,8 @@ public class BankClient
         HttpResponseMessage response = await _httpClient.PostAsync(Url, requestContent);
         string responseContent = await response.Content.ReadAsStringAsync();
 
-        //BankResponse bankResponse = JsonSerializer.Deserialize<BankResponse>(responseContent);
+        Console.WriteLine($"Response from acquiring bank: {responseContent}");
+
         BankResponse bankResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<BankResponse>(responseContent);
 
         return bankResponse.Authorized ? PaymentStatus.Authorized : PaymentStatus.Declined;
