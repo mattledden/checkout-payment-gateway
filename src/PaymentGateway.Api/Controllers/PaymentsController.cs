@@ -30,6 +30,7 @@ public class PaymentsController : Controller
         }
         catch (PaymentNotFoundException ex)
         {
+            Console.WriteLine($"Failed to find payment with id {id}");
             return new NotFoundObjectResult(ex.Message);
         }
     }

@@ -18,6 +18,10 @@ public class PaymentsControllerTests
 {
     private readonly Random _random = new();
 
+    /// <summary>
+    /// Retrieve a previously made payment
+    /// </summary>
+    ///
     [Fact]
     public async Task RetrievesAPaymentSuccessfully()
     {
@@ -53,6 +57,10 @@ public class PaymentsControllerTests
         Assert.NotNull(paymentResponse);
     }
 
+    /// <summary>
+    /// Attempt to retrieve a payment which doesn't exist
+    /// </summary>
+    /// 
     [Fact]
     public async Task Returns404IfPaymentNotFound()
     {
@@ -67,40 +75,11 @@ public class PaymentsControllerTests
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    [Fact]
-    public async Task PostValidPayment()
-    {
-        // Arrange
-        WebApplicationFactory<PaymentsController> webApplicationFactory = new();
-        HttpClient client = webApplicationFactory.CreateClient();
-        string url = $"/api/Payments/new";
-
-        PostPaymentRequest request = new()
-        {
-            CardNumber = "2222405343248112",
-            ExpiryMonth = 11,
-            ExpiryYear = 2026,
-            Currency = "USD",
-            Amount = 60000,
-            Cvv = "456",
-        };
-
-        JsonContent content = JsonContent.Create(request);
-
-        PostPaymentResponse expectedResponse = ResponseHelper.GenerateResponse(request, PaymentStatus.Authorized);
-
-        // Act
-        HttpResponseMessage response = await client.PostAsync(url, content);
-        string responseBody = await response.Content.ReadAsStringAsync();
-        PostPaymentResponse actualResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(responseBody);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(actualResponse);
-
-        TestUtilities.CompareResponses(expectedResponse, actualResponse);
-    }
-
+    /// <summary>
+    /// Attempt to make a payment with an invalid expiry date.
+    /// Should receive a 400 response with Rejected status.
+    /// </summary>
+    /// 
     [Fact]
     public async Task PostInvalidDate()
     {
@@ -135,6 +114,11 @@ public class PaymentsControllerTests
         TestUtilities.CompareResponses(expectedResponse, actualResponse);
     }
 
+    /// <summary>
+    /// Attempt to make a payment which is declined by the acquiring bank.
+    /// Should receive a 400 response with Declined status.
+    /// </summary>
+    /// 
     [Fact]
     public async Task PostUnsupportedPayment()
     {
@@ -167,5 +151,49 @@ public class PaymentsControllerTests
         Assert.NotNull(actualResponse);
 
         TestUtilities.CompareResponses(expectedResponse, actualResponse);
+    }
+
+    /// <summary>
+    /// Retrieve a previously declined payment.
+    /// Should receive a 200 response containing the same object received when making the payment.
+    /// </summary>
+    /// 
+    [Fact]
+    public async Task PostAndRetrieveDeclinedPayment()
+    {
+        // Arrange
+        WebApplicationFactory<PaymentsController> webApplicationFactory = new();
+        HttpClient client = webApplicationFactory.CreateClient();
+        string url = $"/api/Payments/new";
+
+        PostPaymentRequest request = new()
+        {
+            CardNumber = "2222405343248112",
+            ExpiryMonth = 11,
+            ExpiryYear = 2026,
+            Currency = "USD",
+            Amount = 60000,
+            Cvv = "456",
+        };
+
+        JsonContent content = JsonContent.Create(request);
+
+        // Act
+        HttpResponseMessage postResponseMessage = await client.PostAsync(url, content);
+        string postResponseBody = await postResponseMessage.Content.ReadAsStringAsync();
+        PostPaymentResponse postResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(postResponseBody);
+
+        string getUrl = "/api/Payments/" + postResponse.Id;
+
+        HttpResponseMessage getResponseMessage = await client.GetAsync(getUrl);
+        string getResponseBody = await getResponseMessage.Content.ReadAsStringAsync();
+        PostPaymentResponse getResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<PostPaymentResponse>(getResponseBody);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, getResponseMessage.StatusCode);
+        Assert.NotNull(getResponse);
+
+        // check the response from the GET request is the same as the one returned by the POST request
+        TestUtilities.CompareResponses(postResponse, getResponse);
     }
 }

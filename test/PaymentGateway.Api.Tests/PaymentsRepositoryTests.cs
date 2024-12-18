@@ -11,6 +11,11 @@ namespace PaymentGateway.Api.Tests;
 
 public class PaymentsRepositoryTests
 {
+
+    /// <summary>
+    /// Make a payment which is authorized by the acquiring bank
+    /// </summary>
+    /// 
     [Fact]
     public async Task AuthorizedPayment()
     {
@@ -44,6 +49,10 @@ public class PaymentsRepositoryTests
         TestUtilities.CompareResponses(expectedResponse, response);
     }
 
+    /// <summary>
+    /// Make a payment which is declined by the acquiring bank
+    /// </summary>
+    /// 
     [Fact]
     public async Task DeclinedPayment()
     {
@@ -77,6 +86,10 @@ public class PaymentsRepositoryTests
         TestUtilities.CompareResponses(expectedResponse, response);
     }
 
+    /// <summary>
+    /// Make a payment which is invalid so no request is sent to the acquiring bank
+    /// </summary>
+    /// 
     [Fact]
     public async Task InvalidPayment()
     {

@@ -8,7 +8,7 @@ namespace PaymentGateway.Api.PaymentProcessing;
 
 public class BankClient : IBankClient
 {
-    private HttpClient _httpClient;
+    private readonly HttpClient _httpClient;
     private const string Url = "http://localhost:8080/payments";
 
     public BankClient()
@@ -16,9 +16,12 @@ public class BankClient : IBankClient
         _httpClient = new HttpClient();
     }
 
+    /// <summary>
+    /// Serialise request then send it to bank simulator and retrieve status from response
+    /// </summary>
+    /// 
     public virtual async Task<PaymentStatus> SendRequest(BankRequest paymentRequest)
     {
-        // serialise request then send it to bank simulator and retrieve status from response
         string requestBody = JsonSerializer.Serialize(paymentRequest);
         StringContent requestContent = new(requestBody);
 

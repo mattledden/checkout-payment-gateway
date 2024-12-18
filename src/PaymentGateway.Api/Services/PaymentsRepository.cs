@@ -10,8 +10,8 @@ namespace PaymentGateway.Api.Services;
 public class PaymentsRepository
 {
     private List<PostPaymentResponse> Payments = new();
-    private PaymentValidator _paymentValidator;
-    private IBankClient _bankClient;
+    private readonly PaymentValidator _paymentValidator;
+    private readonly IBankClient _bankClient;
 
     public PaymentsRepository(PaymentValidator paymentValidator, IBankClient bankClient)
     {
@@ -24,8 +24,6 @@ public class PaymentsRepository
         Payments.Add(payment);
     }
 
-
-
     public PostPaymentResponse Get(Guid id)
     {
         // throw error if payment is not found
@@ -33,6 +31,10 @@ public class PaymentsRepository
         return paymentResponse is not null ? paymentResponse : throw new PaymentNotFoundException($"Payment with id {id} not found");
     }
 
+    /// <summary>
+    /// Validate payments then send them to the acquiring bank
+    /// </summary>
+    /// 
     public async Task<PostPaymentResponse> ProcessPayment(PostPaymentRequest paymentRequest)
     {
         bool isValid = _paymentValidator.Validate(paymentRequest);
@@ -40,10 +42,13 @@ public class PaymentsRepository
 
         if (!isValid)
         {
+            Console.WriteLine("Payment is invalid");
             status = PaymentStatus.Rejected;
         }
         else
         {
+            Console.WriteLine("Payment is valid");
+
             // make object to send to bank
             BankRequest bankRequest = new(paymentRequest);
 
