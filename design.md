@@ -20,6 +20,8 @@ I made a `DateHelper` class to contain utility methods because I will need to in
 
 I created a `BankRequest` model so the `CardNumber` field could be renamed to `Card_Number` so it would be accepted by the bank simulator and also so I could add the `Expiry_Date` field as a combination of `ExpiryMonth` and `ExpiryYear`.
 
+I could have made types like `Request` and `Response` which other types like `BankRequest` inherit from. This would have reduced some duplicated code (where there are common fields between types) however, because these are simple types which don't contain methods, I decided the added readability and simplicity of listing all fields in each type was better in this case.
+
 ## Assumptions made
 
 - The `PostPaymentRequest` model contained a field called `CardNumberLastFour`. I changed this to `CardNumber` because the spec states that payment requests should contain a full card number. I renamed `PostPaymentRequest` to `PaymentRequest` to be consistent with `PaymentResponse`.
