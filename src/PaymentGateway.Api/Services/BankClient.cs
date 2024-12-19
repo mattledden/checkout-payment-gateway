@@ -29,7 +29,17 @@ public class BankClient : IBankClient
 
         Console.WriteLine($"Response from acquiring bank: {responseContent}");
 
-        BankResponse bankResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<BankResponse>(responseContent);
+        BankResponse bankResponse = new();
+        try
+        {
+            bankResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<BankResponse>(responseContent);
+        }
+        catch (Newtonsoft.Json.JsonSerializationException ex)
+        {
+            Console.WriteLine($"Error deserializing bank response: {ex}");
+            bankResponse.Authorized = false;
+        }
+
 
         return bankResponse.Authorized ? PaymentStatus.Authorized : PaymentStatus.Declined;
     }

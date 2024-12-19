@@ -50,3 +50,5 @@ I created a `BankRequest` model so the `CardNumber` field could be renamed to `C
 - Could make fields within models private and use getter and setter methods. I decided to leave them public for simplicity and to be consistent with the sample code.
 - Could add a method to the controller which returns a list of payments. Either the full list or a list based on a set of requested IDs
 - Would be worth authenticating requests plus considering which merchant is making the request and which bank the request is being sent to- could be worth storing payments accordingly
+- Could have a field on responses which gives a reason why payment was rejected or declined (and could send on the authorization_code field received from the acquiring bank)
+- Could store previous payments in a database e.g. via entity framework
